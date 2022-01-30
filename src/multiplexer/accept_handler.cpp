@@ -16,7 +16,7 @@ namespace webserver::multiplexer {
 		if (recv_result == webserver::sock::SocketResult::OK) {
 			lLog(lDebug) << "Received " << std::string{ data.begin(), data.end() };
 			lLog(lDebug) << "Sending hello message";
-			const auto [sent_result, sent] = socket->Send("Hello there");
+			const auto [sent_result, sent] = new_socket->Send("Hello there");
 			if (sent_result != webserver::sock::SocketResult::OK) {
 				lLog(lDebug) << "Sending failed";
 			}

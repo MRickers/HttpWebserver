@@ -35,7 +35,7 @@ namespace logging {
 			return file;
 		}
 
-		std::string convertLevel(Loglevel level) const {
+		constexpr const char* convertLevel(Loglevel level) const {
 			switch (level) {
 			case Loglevel::L_DEBUG:
 				return " [Debug]";
@@ -76,13 +76,6 @@ namespace logging {
 			sstream_ << formatLogging(level, file, line);
 			return sstream_;
 		} 
-
-		template<typename T>
-		Logger& operator<<(const T& data) {
-			sstream_ << data;
-
-			return *this;
-		}
 
 		static void SetLogLevel(const Loglevel level) {
 			log_level_ = level;

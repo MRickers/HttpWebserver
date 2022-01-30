@@ -24,9 +24,10 @@ namespace webserver::multiplexer {
 		// init socket connection
 		webserver::sock::ISocketTcp::Init();
 
-		const auto master_socket = webserver::sock::SocketFactory{}.Create(accept_socket_);
+		const auto master_socket = webserver::sock::SocketFactory{}.Create();
 		const auto multiplexer = webserver::multiplexer::MultiplexerFactory().Create();
 
+		accept_socket_ = master_socket->GetFd();
 
 		master_socket->Bind(port);
 		master_socket->Listen();
@@ -47,18 +48,23 @@ namespace webserver::multiplexer {
 				std::vector<int16_t>{}, 
 				std::vector<int16_t>{});
 
-			for (const auto fd : read_fds_) {
+			for (const auto fd : active_fds) {
 				if (fd == accept_socket_) {
 					lLog(lDebug) << "Handling AcceptRequest";
 					accept_handler_->HandleRequest(accept_socket_);
 				}
 				else {
 					lLog(lDebug) << "Handling ReadRequest";
+					const auto socket = webserver::sock::SocketFactory{}.Create(fd);
 
+
+					const auto [sent_result, sent] = socket->Send("General Kenobi");
+					if (sent_result != webserver::sock::SocketResult::OK) {
+						lLog(lError) << "Sent failed " << static_cast<int>(sent_result);
+					}
+					queue_->Push(fd);
 				}
 			}
-
-
 		}
 	}
 }

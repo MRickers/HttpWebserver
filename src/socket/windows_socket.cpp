@@ -47,18 +47,19 @@ namespace webserver::sock {
         socket_(sock),
         port_(port),
         host_(host)    {
+        
+    }
+
+	WindowsSocketTcp::WindowsSocketTcp(const std::string& host, uint32_t port) : 
+        socket_(),
+        port_(port),
+        host_(host)
+    {
         socket_ = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (socket_ == INVALID_SOCKET) {
             lLog(lError) << "Create socket failed: " << printWindowsErrorMessage(WSAGetLastError());
             throw SocketException{ "Create socket failed.", (int16_t)WSAGetLastError() };
         }
-    }
-
-	WindowsSocketTcp::WindowsSocketTcp(const std::string& host, uint32_t port) : 
-		socket_(),
-		port_(port),
-		host_(host) {
-			
 	}
 
     

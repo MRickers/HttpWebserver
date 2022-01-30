@@ -19,9 +19,9 @@ namespace webserver::multiplexer {
 	}
 
 	webserver::sock::Result<std::vector<int16_t>> SelectMultiplexer::Select(
-		const std::vector<int16_t>& read_fds,
-		const std::vector<int16_t>& write_fds,
-		const std::vector<int16_t>& except_fds) const {
+		std::vector<int16_t>& read_fds,
+		std::vector<int16_t>& write_fds,
+		std::vector<int16_t>& except_fds) const {
 
 		if (read_fds.empty() && write_fds.empty() && except_fds.empty()) {
 			return webserver::sock::Result<std::vector<int16_t>>{webserver::sock::SocketResult::OK, {}};
@@ -74,6 +74,9 @@ namespace webserver::multiplexer {
 			read_fds.begin(),
 			read_fds.end(),
 			std::back_inserter(active_fds), std::bind(&isFdSet, std::placeholders::_1, read_set));
+
+		read_fds.erase(std::remove_if(read_fds.begin(), read_fds.end(),
+			std::bind(&isFdSet, std::placeholders::_1, read_set)), read_fds.end());
 
 		return webserver::sock::Result<std::vector<int16_t>>{ webserver::sock::SocketResult::OK, active_fds };
 	}

@@ -17,9 +17,9 @@ namespace webserver::multiplexer {
 		Queue queue_;
 	public:
 		SelectDispatcher(AcceptHandler accept_handler, Queue queue);
-		void AddClient(int16_t fd) override;
-		void RemoveClient(int16_t fd) override;
+		virtual void AddClient(int16_t fd) override;
+		virtual void RemoveClient(int16_t fd) override;
 
-		void HandleEvents(uint16_t port) override;
+		virtual void HandleEvents(uint16_t port) override;
 	};
 }

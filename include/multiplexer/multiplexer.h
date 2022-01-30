@@ -8,8 +8,8 @@ namespace webserver::multiplexer {
 		virtual ~IMultiplexer() {}
 
 		virtual webserver::sock::Result<std::vector<int16_t>> Select(
-			const std::vector<int16_t>& read_fds,
-			const std::vector<int16_t>& write_fds,
-			const std::vector<int16_t>& except_fds) const = 0;
+			std::vector<int16_t>& read_fds,
+			std::vector<int16_t>& write_fds,
+			std::vector<int16_t>& except_fds) const = 0;
 	};
 }
