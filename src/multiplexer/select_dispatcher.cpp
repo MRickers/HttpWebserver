@@ -2,11 +2,12 @@
 #include <multiplexer/select_dispatcher.h>
 #include <factories/multiplexer_factory.h>
 #include <factories/socket_factory.h>
+#include <factories/request_handler_factory.h>
 #include <logging/logging.h>
 
 namespace webserver::multiplexer {
-	SelectDispatcher::SelectDispatcher(AcceptHandler accept_handler, Queue queue)
-		: accept_socket_(), read_fds_(), accept_handler_(std::move(accept_handler)), queue_(queue) {
+	SelectDispatcher::SelectDispatcher(Queue queue)
+		: accept_socket_(), read_fds_(), queue_(queue) {
 
 	}
 
@@ -26,6 +27,7 @@ namespace webserver::multiplexer {
 
 		const auto master_socket = webserver::sock::SocketFactory{}.Create();
 		const auto multiplexer = webserver::multiplexer::MultiplexerFactory().Create();
+		const auto accept_handler = webserver::multiplexer::RequestHandlerFactory().CreateAcceptHandler(queue_);
 
 		accept_socket_ = master_socket->GetFd();
 
@@ -51,18 +53,13 @@ namespace webserver::multiplexer {
 			for (const auto fd : active_fds) {
 				if (fd == accept_socket_) {
 					lLog(lDebug) << "Handling AcceptRequest";
-					accept_handler_->HandleRequest(accept_socket_);
+					accept_handler->HandleRequest(accept_socket_);
 				}
 				else {
 					lLog(lDebug) << "Handling ReadRequest";
-					const auto socket = webserver::sock::SocketFactory{}.Create(fd);
+					const auto read_handler = webserver::multiplexer::RequestHandlerFactory().CreateReadHandler(queue_);
 
-
-					const auto [sent_result, sent] = socket->Send("General Kenobi");
-					if (sent_result != webserver::sock::SocketResult::OK) {
-						lLog(lError) << "Sent failed " << static_cast<int>(sent_result);
-					}
-					queue_->Push(fd);
+					read_handler->HandleRequest(fd);
 				}
 			}
 		}

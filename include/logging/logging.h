@@ -10,10 +10,10 @@
 
 
 namespace logging {
-	enum class Loglevel : int { L_ALL = 0, L_DEBUG = 10, L_INFO = 30, L_WARN = 50, L_ERROR = 70 };
+	enum class Loglevel : int { LEVEL_ALL = 0, LEVEL_INFO = 10, LEVEL_DEBUG = 30, LEVEL_WARN = 50, LEVEL_ERR = 70 };
 
 	class Logger {
-		static inline Loglevel log_level_ = Loglevel::L_ALL;
+		static inline Loglevel log_level_ = Loglevel::LEVEL_ALL;
 	private:
 		static inline std::ostream* stream_ = &std::cout;
 		static inline std::ofstream ostream_;
@@ -37,13 +37,13 @@ namespace logging {
 
 		constexpr const char* convertLevel(Loglevel level) const {
 			switch (level) {
-			case Loglevel::L_DEBUG:
+			case Loglevel::LEVEL_DEBUG:
 				return " [Debug]";
-			case Loglevel::L_INFO:
+			case Loglevel::LEVEL_INFO:
 				return " [Info]";
-			case Loglevel::L_WARN:
+			case Loglevel::LEVEL_WARN:
 				return " [Warn]";
-			case Loglevel::L_ERROR:
+			case Loglevel::LEVEL_ERR:
 				return " [Error]";
 			default:
 				return " [All]";
@@ -98,8 +98,8 @@ namespace logging {
 
 #define lLog(level) if(level < logging::Logger::GetLogLevel());else logging::Logger().Get(level, __FILE__, __LINE__)
 
-#define lAll	(logging::Loglevel::L_ALL)
-#define lDebug	(logging::Loglevel::L_DEBUG)
-#define lInfo	(logging::Loglevel::L_INFO)
-#define lWarn	(logging::Loglevel::L_WARN)
-#define lError	(logging::Loglevel::L_ERROR)
+#define lAll	(logging::Loglevel::LEVEL_ALL)
+#define lDebug	(logging::Loglevel::LEVEL_DEBUG)
+#define lInfo	(logging::Loglevel::LEVEL_INFO)
+#define lWarn	(logging::Loglevel::LEVEL_WARN)
+#define lError	(logging::Loglevel::LEVEL_ERR)

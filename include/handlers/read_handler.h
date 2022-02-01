@@ -6,14 +6,16 @@
 namespace webserver::multiplexer {
 	using FdQueue = std::shared_ptr<webserver::util::BlockingQueue<int16_t>>;
 
-	class AcceptRequestHandler : public IRequestHandler {
+	class ReadRequestHandler : public IRequestHandler {
 	private:
 		FdQueue queue_;
 	public:
-		AcceptRequestHandler(FdQueue queue);
-		AcceptRequestHandler(const AcceptRequestHandler&) = delete;
-		AcceptRequestHandler& operator=(const AcceptRequestHandler&) = delete;
+		ReadRequestHandler(FdQueue queue);
+
+		ReadRequestHandler(const ReadRequestHandler&) = delete;
+		ReadRequestHandler& operator=(const ReadRequestHandler&) = delete;
 
 		virtual void HandleRequest(int fd) override;
+
 	};
 }

@@ -8,6 +8,6 @@ namespace webserver::multiplexer {
 
 	DispatcherPtr DispatcherFactory::Create() const {
 		const auto fd_queue = std::make_shared<webserver::util::BlockingQueue<int16_t>>();
-		return std::make_unique<SelectDispatcher>(std::make_unique<AcceptRequestHandler>(fd_queue), fd_queue);
+		return std::make_unique<SelectDispatcher>(fd_queue);
 	}
 }

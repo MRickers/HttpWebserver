@@ -27,9 +27,11 @@ add_executable(dispatcher_example
 src/dispatcher_example.cpp
 ${CMAKE_SOURCE_DIR}/src/multiplexer/select_dispatcher.cpp
 ${CMAKE_SOURCE_DIR}/src/multiplexer/accept_handler.cpp
+${CMAKE_SOURCE_DIR}/src/multiplexer/read_handler.cpp
 ${CMAKE_SOURCE_DIR}/src/multiplexer/multiplexer_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/multiplexer/select_multiplexer.cpp
 ${CMAKE_SOURCE_DIR}/src/multiplexer/dispatcher_factory.cpp
+${CMAKE_SOURCE_DIR}/src/multiplexer/request_handler_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/server/server.cpp
 ${SOCKET_SOURCES})
 target_include_directories(dispatcher_example  PRIVATE ${CMAKE_SOURCE_DIR}/include)

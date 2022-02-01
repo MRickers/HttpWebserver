@@ -49,6 +49,7 @@ namespace webserver::sock {
 
 		static void Init();
 		static void CleanUp();
+
 		virtual void Connect(const std::string& host, uint32_t port) = 0;
 		virtual void ConnectTimeout(const std::string& host, uint32_t port, uint32_t timeout_ms) = 0;
 		virtual void Close() = 0;
@@ -59,7 +60,8 @@ namespace webserver::sock {
 		virtual void Bind(uint32_t port) = 0;
 		virtual void Listen() = 0;
 		virtual std::unique_ptr<ISocketTcp> Accept() = 0;
-		virtual int16_t GetFd() = 0;
+		virtual int16_t GetFd() const = 0;
+		virtual void SetFd(int16_t fd) = 0;
 		virtual std::string GetPeerAddress() const = 0;
 	};
 }

@@ -257,8 +257,12 @@ namespace webserver::sock {
 		return std::make_unique<WindowsSocketTcp>(sock2, "", 0);
 	}
 
-    int16_t WindowsSocketTcp::GetFd() {
+    int16_t WindowsSocketTcp::GetFd() const {
         return static_cast<int16_t>(socket_);
+    }
+
+    void WindowsSocketTcp::SetFd(int16_t fd) {
+        socket_ = fd;
     }
 
     std::string WindowsSocketTcp::GetPeerAddress() const {

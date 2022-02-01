@@ -1,8 +1,8 @@
 #pragma once
 #include <factories/socket_factory.h>
 #include <WinSock2.h>
-#include <iphlpapi.h>
 #include <Windows.h>
+#include <iphlpapi.h>
 #include <Ws2tcpip.h>
 
 namespace webserver::sock {
@@ -28,7 +28,8 @@ namespace webserver::sock {
 		virtual void Bind(uint32_t port) override;
 		virtual void Listen() override;
 		virtual std::unique_ptr<ISocketTcp> Accept() override;
-		virtual int16_t GetFd() override;
+		virtual int16_t GetFd() const override;
+		virtual void SetFd(int16_t fd) override;
 		virtual std::string GetPeerAddress() const override;
 	};
 }
