@@ -18,8 +18,21 @@ include(InstallRequiredSystemLibraries)
 add_definitions(-DNOMINMAX) # to use std::max
 
 elseif(UNIX)
-add_compile_options(-Wall -Wextra -pendatic -Werror -fstack-protector)
+# GCC-Options: 		 https://gcc.gnu.org/onlinedocs/gcc-9.4.0/gcc/C_002b_002b-Dialect-Options.html
+	# GCC Debug-Options: https://gcc.gnu.org/onlinedocs/gcc-9.4.0/gcc/Debugging-Options.html#Debugging-Options
+	# -Wall 				- activates most of the warnings
+	# -Wextra 				- activates even more warnings
+	# -pedantic				- Issue all the warnings demanded by strict ISO C and ISO C++
+	# -werror				- make every warning a compile error
+	# -fstack-protector-all	- protects the stack
+	# -Wno-unused-value 	- Warn about unused values
+	# -Wformat				- Checks printf matches
+	# -Wformat-security 	- Checks for security problems
+	# -ggdb 				- Produce debugging information for use by GDB
+	# -D-FORTIFY-SOURCE 	- Run-time buffer overflow detection
+	add_compile_options(-Wall -Wextra -Werror -fstack-protector-all -Wno-unused-value -Wformat -Wformat-security $<$<CONFIG:Debug>:-ggdb> $<$<CONFIG:Release>:-D_FORTIFY_SOURCE=2>)
 endif()
+
 
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
