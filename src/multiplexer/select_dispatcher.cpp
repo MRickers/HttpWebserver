@@ -35,11 +35,14 @@ namespace webserver::multiplexer {
 		master_socket->Listen();
 		read_fds_.push_back(accept_socket_);
 
+		std::vector<int16_t> write_fds;
+		std::vector<int16_t> except_fds;
+
 		while (true) {
 			// sockets aus der queue holen
 
 			const auto queue_size = queue_->Size();
-			for (int i = 0; i < queue_size; i++) {
+			for (size_t i = 0; i < queue_size; i++) {
 				if (const auto fd = queue_->Pop();fd.has_value()) {
 					read_fds_.push_back(fd.value());
 				}
@@ -47,8 +50,8 @@ namespace webserver::multiplexer {
 
 			const auto [result, active_fds] = multiplexer->Select(
 				read_fds_, 
-				std::vector<int16_t>{}, 
-				std::vector<int16_t>{});
+				write_fds, 
+				except_fds);
 
 			for (const auto fd : active_fds) {
 				if (fd == accept_socket_) {

@@ -1,10 +1,28 @@
 #include <algorithm>
 #include <functional>
-#include <WinSock2.h>
-
 #include <logging/logging.h>
 #include <multiplexer/select_multiplexer.h>
 #include <util/util.h>
+
+#if _WIN32
+#include <WinSock2.h>
+
+static webserver::sock::SocketResult getSocketResult() {
+	return webserver::util::convertToResult(WSAGetLastError());
+}
+
+#elif __linux__
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+static const int SOCKET_ERROR = -1;
+
+static webserver::sock::SocketResult getSocketResult() {
+	return webserver::sock::SocketResult::DEFAULTERROR;
+}
+#endif
 
 namespace webserver::multiplexer {
 	static bool isFdSet(int fd, const fd_set& set) {
@@ -35,17 +53,18 @@ namespace webserver::multiplexer {
 		FD_ZERO(&write_set);
 		FD_ZERO(&except_set);
 
-		for (const auto& fd : read_fds) {
+		for (const int& fd : read_fds) {
 			FD_SET(fd, &read_set);
 		}
-
-		for (const auto& fd : write_fds) {
+/*
+		for (const int& fd : write_fds) {
 			FD_SET(fd, &write_fds);
 		}
 
-		for (const auto& fd : except_fds) {
+		for (const int& fd : except_fds) {
 			FD_SET(fd, &except_fds);
 		}
+*/
 		// find max fd
 
 		std::vector<int16_t> all_fds{ read_fds.begin(), read_fds.end() };
@@ -54,7 +73,7 @@ namespace webserver::multiplexer {
 
 		const auto max_fd = std::max_element(all_fds.begin(), all_fds.end());
 
-		timeval timeout = { 0x00 };
+		timeval timeout;
 		const long timeout_ms = 50;
 		timeout.tv_sec = timeout_ms % 1000;
 		timeout.tv_usec = timeout_ms * 1000;
@@ -62,7 +81,7 @@ namespace webserver::multiplexer {
 		const auto activity = select(*max_fd + 1, &read_set, &write_set, &except_set, &timeout);
 
 		if (activity == SOCKET_ERROR) {
-			return webserver::sock::Result<std::vector<int16_t>>{ webserver::util::convertToResult(WSAGetLastError()), {} };
+			return webserver::sock::Result<std::vector<int16_t>>{ getSocketResult(), {} };
 		}
 		else if (activity < 0) {
 			return webserver::sock::Result<std::vector<int16_t>>{ webserver::sock::SocketResult::TIMEDOUT, {} };

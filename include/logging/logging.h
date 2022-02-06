@@ -64,7 +64,7 @@ namespace logging {
 		}
 
 	public:
-		Logger(std::ostream& stream = std::cout) :
+		Logger([[maybe_unused]]std::ostream& stream = std::cout) :
 			sstream_()
 		{}
 
@@ -81,7 +81,7 @@ namespace logging {
 			log_level_ = level;
 		}
 
-		static const Loglevel GetLogLevel() {
+		static Loglevel GetLogLevel() {
 			return log_level_;
 		}
 
