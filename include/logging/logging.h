@@ -64,7 +64,7 @@ namespace logging {
 		}
 
 	public:
-		Logger([[maybe_unused]]std::ostream& stream = std::cout) :
+		Logger() :
 			sstream_()
 		{}
 

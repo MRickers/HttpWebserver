@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <socket/socket.h>
 
 namespace webserver::multiplexer {
@@ -12,4 +13,5 @@ namespace webserver::multiplexer {
 			std::vector<int16_t>& write_fds,
 			std::vector<int16_t>& except_fds) const = 0;
 	};
+	using MultiplexerPtr = std::unique_ptr<IMultiplexer>;
 }

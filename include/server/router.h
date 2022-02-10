@@ -7,10 +7,13 @@
 namespace webserver {
 	using RequestHandler = std::function<void()>;
 	using RequestHandlerContainer = std::unordered_map<std::string, RequestHandler>;
-	class Router {
-	private:
-		RequestHandlerContainer request_handlers_;
+
+	class IRouter {
 	public:
-		Router();
+		~IRouter() {}
+		virtual void Register(const std::string& url, RequestHandler callback) = 0;
+		virtual RequestHandler GetHandler(const std::string& url) const = 0;
 	};
+	
+	using RouterPtr = std::unique_ptr<IRouter>;
 }

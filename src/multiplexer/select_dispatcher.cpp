@@ -6,8 +6,8 @@
 #include <logging/logging.h>
 
 namespace webserver::multiplexer {
-	SelectDispatcher::SelectDispatcher(Queue queue)
-		: accept_socket_(), read_fds_(), queue_(queue) {
+	SelectDispatcher::SelectDispatcher(MultiplexerPtr multiplexer, RequestHandlerPtr accept_handler, Queue queue)
+		: accept_socket_(), read_fds_(), queue_(queue), multiplexer_(std::move(multiplexer)), accept_handler_(std::move(accept_handler)) {
 
 	}
 
@@ -21,13 +21,11 @@ namespace webserver::multiplexer {
 		}
 	}
 
-	void SelectDispatcher::HandleEvents(uint16_t port) {
+	void SelectDispatcher::Init(uint16_t port) {
 		// init socket connection
 		webserver::sock::ISocketTcp::Init();
 
 		const auto master_socket = webserver::sock::SocketFactory{}.Create();
-		const auto multiplexer = webserver::multiplexer::MultiplexerFactory().Create();
-		const auto accept_handler = webserver::multiplexer::RequestHandlerFactory().CreateAcceptHandler(queue_);
 
 		accept_socket_ = master_socket->GetFd();
 
@@ -35,6 +33,9 @@ namespace webserver::multiplexer {
 		master_socket->Listen();
 		read_fds_.push_back(accept_socket_);
 
+	}
+
+	std::vector<int16_t> SelectDispatcher::WaitForEvents() {
 		std::vector<int16_t> write_fds;
 		std::vector<int16_t> except_fds;
 
