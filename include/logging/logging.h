@@ -59,7 +59,7 @@ namespace logging {
 
 			std::stringstream ss{};
 			ss << std::put_time(std::localtime(&t), "%F %T") << "." << ms_frac << " " << std::this_thread::get_id()
-				<< " " << file_name(file.c_str()) << ":" << line << convertLevel(level) << ": ";
+				<< " " <<  convertLevel(level) << " " << file_name(file.c_str()) << ":" << line << ": ";
 			return ss.str();
 		}
 

@@ -15,12 +15,13 @@ namespace webserver::multiplexer {
 		Queue queue_;
 		MultiplexerPtr multiplexer_;
 		RequestHandlerPtr accept_handler_;
+		bool listen_for_events_;
 	public:
 		SelectDispatcher(MultiplexerPtr multiplexer, RequestHandlerPtr accept_handler, Queue queue);
 		virtual void AddClient(int16_t fd) override;
 		virtual void RemoveClient(int16_t fd) override;
 
 		virtual void Init(uint16_t port) override;
-		virtual std::vector<int16_t> WaitForEvents() override;
+		virtual void WaitForEvents() override;
 	};
 }

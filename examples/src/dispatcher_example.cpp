@@ -11,14 +11,9 @@
 int main() {
 	lLog(lDebug) << "Dispatcher example";
 	auto router = webserver::RouterFactory().Create();
-	auto queue = std::make_shared<webserver::util::BlockingQueue<int16_t>>();
-	auto multiplexer = webserver::multiplexer::MultiplexerFactory{}.Create();
-	auto accept_handler = webserver::multiplexer::RequestHandlerFactory{}.CreateAcceptHandler(queue);
-	auto dispatcher = webserver::multiplexer::DispatcherFactory().Create(std::move(multiplexer), std::move(accept_handler), queue);
 
 	const uint32_t port = 30001;
-	dispatcher->Init(port);
-	webserver::Server server{port, std::move(dispatcher), std::move(router)};
+	webserver::Server server{port, std::move(router)};
 
 	try {
 		server.Run();

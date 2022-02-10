@@ -12,7 +12,7 @@ namespace webserver::multiplexer {
 		virtual void RemoveClient(int16_t fd) = 0;
 
 		virtual void Init(uint16_t port) = 0;
-		virtual std::vector<int16_t> WaitForEvents() = 0;
+		virtual void  WaitForEvents() = 0;
 
 	};
 

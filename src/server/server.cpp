@@ -4,6 +4,8 @@
 #include <factories/multiplexer_factory.h>
 #include <factories/request_handler_factory.h>
 #include <util/blocking_queue.h>
+#include <logging/logging.h>
+#include <util/util.h>
 
 namespace webserver {
 
@@ -21,9 +23,19 @@ namespace webserver {
 		auto accept_handler = webserver::multiplexer::RequestHandlerFactory{}.CreateAcceptHandler(queue);
 		auto dispatcher = multiplexer::DispatcherFactory().Create(std::move(multiplexer), std::move(accept_handler), queue);
 
-		dispatcher->Init(port_);
+		lLog(lDebug) << "Init dispatcher";
 
+		try {
+			dispatcher->Init(port_);
+			lLog(lDebug) << "Waiting for events";
 
-		dispatcher_->WaitForEvents();
+			dispatcher->WaitForEvents();
+
+		} catch(const webserver::sock::SocketException& e) {
+			lLog(lError) << e.what();
+		} catch(const webserver::util::ServerException& e) {
+			lLog(lError) << e.what();
+		}
+
 	}
 }

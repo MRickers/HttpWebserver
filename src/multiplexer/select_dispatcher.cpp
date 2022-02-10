@@ -7,7 +7,12 @@
 
 namespace webserver::multiplexer {
 	SelectDispatcher::SelectDispatcher(MultiplexerPtr multiplexer, RequestHandlerPtr accept_handler, Queue queue)
-		: accept_socket_(), read_fds_(), queue_(queue), multiplexer_(std::move(multiplexer)), accept_handler_(std::move(accept_handler)) {
+		: accept_socket_(), 
+		read_fds_(), 
+		queue_(queue), 
+		multiplexer_(std::move(multiplexer)), 
+		accept_handler_(std::move(accept_handler)),
+		listen_for_events_(false) {
 
 	}
 
@@ -35,11 +40,11 @@ namespace webserver::multiplexer {
 
 	}
 
-	std::vector<int16_t> SelectDispatcher::WaitForEvents() {
+	void SelectDispatcher::WaitForEvents() {
 		std::vector<int16_t> write_fds;
 		std::vector<int16_t> except_fds;
 
-		while (true) {
+		while (listen_for_events_) {
 			// sockets aus der queue holen
 
 			const auto queue_size = queue_->Size();
@@ -49,7 +54,7 @@ namespace webserver::multiplexer {
 				}
 			}
 
-			const auto [result, active_fds] = multiplexer->Select(
+			const auto [result, active_fds] = multiplexer_->Select(
 				read_fds_, 
 				write_fds, 
 				except_fds);
@@ -57,7 +62,7 @@ namespace webserver::multiplexer {
 			for (const auto fd : active_fds) {
 				if (fd == accept_socket_) {
 					lLog(lDebug) << "Handling AcceptRequest";
-					accept_handler->HandleRequest(accept_socket_);
+					accept_handler_->HandleRequest(accept_socket_);
 				}
 				else {
 					lLog(lDebug) << "Handling ReadRequest";

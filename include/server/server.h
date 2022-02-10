@@ -1,11 +1,10 @@
 #pragma once
 #include <memory>
 #include <server/router.h>
-#include <multiplexer/request_dispatcher.h>
+
 namespace webserver {
 	class Server {
 	private:
-		webserver::multiplexer::DispatcherPtr dispatcher_;
 		RouterPtr router_;
 		uint32_t port_;
 	public:
