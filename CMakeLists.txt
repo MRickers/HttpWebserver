@@ -40,6 +40,6 @@ set(VERSION_PATCH "0")
 set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 configure_file("config_version.h.in" ${CMAKE_SOURCE_DIR}/include/config_version.h @ONLY)
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(googletest)
 add_subdirectory(examples)
+add_subdirectory(tests)

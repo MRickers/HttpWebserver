@@ -10,11 +10,11 @@ target_include_directories(logging_example PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(logging_example Threads::Threads)
 
 if(WIN32)
-message(STATUS "Building windows sockets")
+message(STATUS "Building with windows sockets")
 set(SOCKET_SOURCES ${CMAKE_SOURCE_DIR}/src/socket/windows_socket.cpp
 ${CMAKE_SOURCE_DIR}/src/util/util.cpp)
 elseif(UNIX)
-message(STATUS "Building linux sockets")
+message(STATUS "Building with linux sockets")
 set(SOCKET_SOURCES ${CMAKE_SOURCE_DIR}/src/socket/linux_socket.cpp)
 endif()
 

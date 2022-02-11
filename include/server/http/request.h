@@ -3,6 +3,6 @@
 namespace webserver::http {
     class HttpRequest {
     public:
-
+        
     };
 }
