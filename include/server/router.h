@@ -8,7 +8,7 @@ namespace webserver {
 	using RequestHandler = std::function<void()>;
 	using RequestHandlerContainer = std::unordered_map<std::string, RequestHandler>;
 
-	enum class HttPMethod : uint16_t {
+	enum class HttpMethod : uint16_t {
 		Get,
 		Post,
 		Update,

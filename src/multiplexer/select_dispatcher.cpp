@@ -44,6 +44,8 @@ namespace webserver::multiplexer {
 		std::vector<int16_t> write_fds;
 		std::vector<int16_t> except_fds;
 
+		listen_for_events_ = true;
+
 		while (listen_for_events_) {
 			// sockets aus der queue holen
 
@@ -72,5 +74,7 @@ namespace webserver::multiplexer {
 				}
 			}
 		}
+
+		lLog(lDebug) << "Shutting down";
 	}
 }

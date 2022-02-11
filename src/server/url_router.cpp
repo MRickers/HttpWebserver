@@ -7,7 +7,11 @@ namespace webserver {
 
         }
 
-		void UrlRouter::Register(const std::string& url, RequestHandler callback) {
+        void UrlRouter::ServeAsset([[maybe_unused]]const std::string& url, [[maybe_unused]]const std::string& path) {
+
+        }
+
+		void UrlRouter::Register([[maybe_unused]]const HttpMethod method, const std::string& url, RequestHandler callback) {
             if(const auto url_ = request_handlers_.find(url); url_ != request_handlers_.end()) {
                 lLog(lDebug) << "Register url: " << url;
                 const auto [it, success] = request_handlers_.insert({url, callback});
