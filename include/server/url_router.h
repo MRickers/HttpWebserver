@@ -5,7 +5,12 @@ namespace  webserver
 {
     class UrlRouter : public IRouter{
     private:
-        RequestHandlerContainer request_handlers_;
+        RequestHandlerContainer request_get_handlers_;
+        RequestHandlerContainer request_post_handlers_;
+        RequestHandlerContainer request_update_handlers_;
+        RequestHandlerContainer request_delete_handlers_;
+
+        RequestHandlerContainer getHandlers(const HttpMethod method) const;
     public:
         UrlRouter();
 
@@ -14,7 +19,7 @@ namespace  webserver
 
         virtual void Register(const HttpMethod method, const std::string& url, RequestHandler callback) override;
         virtual void ServeAsset(const std::string& url, const std::string& path) override;
-        virtual RequestHandler GetHandler(const std::string& url) const override;
+        virtual RequestHandler GetHandler(const HttpMethod method, const std::string& url) const override;
     };
     
 } // namespace  webserver
