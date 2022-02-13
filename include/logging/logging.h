@@ -38,15 +38,15 @@ namespace logging {
 		constexpr const char* convertLevel(Loglevel level) const {
 			switch (level) {
 			case Loglevel::LEVEL_DEBUG:
-				return " [Debug]";
+				return "[Debug]";
 			case Loglevel::LEVEL_INFO:
-				return " [Info]";
+				return "[Info]";
 			case Loglevel::LEVEL_WARN:
-				return " [Warn]";
+				return "[Warn]";
 			case Loglevel::LEVEL_ERR:
-				return " [Error]";
+				return "[Error]";
 			default:
-				return " [All]";
+				return "[All]";
 			}
 		}
 

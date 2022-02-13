@@ -21,14 +21,13 @@ namespace webserver::util {
 
         lLog(lDebug) << "Parsing Http Request";
         for(const auto& line : lines) {
-            lLog(lDebug) << line;
-
             if(!first_line) {
                 // parse first line
                 parseFirstLine(request, line);
                 first_line = true;
-                lLog(lDebug) << "Method=" << static_cast<int>(request.method) << " url=" << request.url << " http= " << request.http_version;
             }
+
+
 
         }
 
@@ -43,41 +42,35 @@ namespace webserver::util {
         } else if(data.find(MAC_ENDINGS) != std::string::npos) {
             return MAC_ENDINGS;
         } else {
+            lLog(lDebug) << "Invalid line ending";
             throw ServerException{"Invalid line ending", -1};
         }
     }
 
     void  HttpParser::parseFirstLine(Request& request, const std::string& line) const {
         const auto items = Split(line, " ");
-        lLog(lDebug) << "Size " << items.size();
-        lLog(lDebug) << items.at(0) << " | " << items.at(1) << " | " << items.at(2);
         try {
             // Method
-            if(items.at(0).find("GET")) {
+            if(items.at(0).find("GET") != std::string::npos) {
                 request.method = types::HttpMethod::Get;
-            } else if(items.at(0).find("POST") || items.at(0).find("PUT")) {
+            } else if(items.at(0).find("POST")!= std::string::npos || items.at(0).find("PUT")!= std::string::npos) {
                 request.method = types::HttpMethod::Post;
-            } else if(items.at(0).find("UPDATE")) {
+            } else if(items.at(0).find("UPDATE")!= std::string::npos) {
                 request.method = types::HttpMethod::Update;
-            } else if(items.at(0).find("DELETE")) {
+            } else if(items.at(0).find("DELETE")!= std::string::npos) {
                 request.method = types::HttpMethod::Delete;
             } else {
                 throw ServerException{"No Http Method found.", -1};
             }
-
-            lLog(lDebug) << "Url " << items.at(1);
             // Url
             if(!items.at(1).empty()) {
                 request.url = items.at(1);
             }
 
             const auto header_line = items.at(2);
-            lLog(lDebug) << "Header " << header_line;
             // Http Header
             if(header_line.find("HTTP") != std::string::npos) {
-                lLog(lDebug) << "HTTP found";
                 const auto version = header_line.find("/");
-                lLog(lDebug) << "version=" << version;
                 request.http_version = header_line.substr(version+1);
             } else {
                 throw ServerException{"No Http Header found", -2};

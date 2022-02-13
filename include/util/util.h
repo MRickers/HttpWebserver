@@ -1,6 +1,5 @@
 #pragma once
-#include <string>
-#include <vector>
+#include <socket/socket.h>
 
 namespace webserver::util {
     class ServerException : public std::exception {
@@ -14,7 +13,7 @@ namespace webserver::util {
 			m_error_code(error_code),
 			m_info(info.c_str()) {}
 
-		const char* GetMsg() { return m_msg; }
+		virtual const char* what() const noexcept override { return m_msg; }
 		const char* GetInfo() { return m_info; }
 		int16_t GetErrorCode() { return m_error_code; }
 
