@@ -11,7 +11,7 @@ namespace webserver {
 
         }
 
-		void UrlRouter::Register([[maybe_unused]]const HttpMethod method, const std::string& url, RequestHandler callback) {
+		void UrlRouter::Register(const types::HttpMethod method, const std::string& url, RequestHandler callback) {
             try {
                 auto handlers = getHandlers(method);
 
@@ -36,7 +36,7 @@ namespace webserver {
         }
 
 
-		RequestHandler UrlRouter::GetHandler(const HttpMethod method, const std::string& url) const {
+		RequestHandler UrlRouter::GetHandler(const types::HttpMethod method, const std::string& url) const {
             const auto handlers = getHandlers(method);
 
             if(const auto url_ = handlers.find(url); url_ != handlers.end()) {
@@ -47,14 +47,14 @@ namespace webserver {
             throw webserver::util::ServerException{msg, -1};
         }
 
-        RequestHandlerContainer UrlRouter::getHandlers(const HttpMethod method) const {
-            if(method == HttpMethod::Get) {
+        RequestHandlerContainer UrlRouter::getHandlers(const types::HttpMethod method) const {
+            if(method == types::HttpMethod::Get) {
                 return request_get_handlers_;
-            } else if(method == HttpMethod::Post) {
+            } else if(method == types::HttpMethod::Post) {
                 return request_post_handlers_;
-            } else if(method == HttpMethod::Update) {
+            } else if(method == types::HttpMethod::Update) {
                 return request_update_handlers_;
-            } else if(method == HttpMethod::Delete) {
+            } else if(method == types::HttpMethod::Delete) {
                 return request_delete_handlers_;
             } else {
                 std::string msg = "Method ";
