@@ -47,37 +47,135 @@ namespace webserver::util {
         }
     }
 
-    void  HttpParser::parseFirstLine(Request& request, const std::string& line) const {
-        const auto items = Split(line, " ");
+    void HttpParser::parseFirstLine(Request& request, const std::string& line) const {
         try {
+            const auto tokens = Split(line, " ");
+            if(tokens.size() != 3) {
+                throw ServerException{"Http Protocol invalid", -1};
+            }
             // Method
-            if(items.at(0).find("GET") != std::string::npos) {
+            if(tokens.at(0).find("GET") != std::string::npos) {
                 request.method = types::HttpMethod::Get;
-            } else if(items.at(0).find("POST")!= std::string::npos || items.at(0).find("PUT")!= std::string::npos) {
+            } else if(tokens.at(0).find("POST")!= std::string::npos || tokens.at(0).find("PUT")!= std::string::npos) {
                 request.method = types::HttpMethod::Post;
-            } else if(items.at(0).find("UPDATE")!= std::string::npos) {
+            } else if(tokens.at(0).find("UPDATE")!= std::string::npos) {
                 request.method = types::HttpMethod::Update;
-            } else if(items.at(0).find("DELETE")!= std::string::npos) {
+            } else if(tokens.at(0).find("DELETE")!= std::string::npos) {
                 request.method = types::HttpMethod::Delete;
             } else {
                 throw ServerException{"No Http Method found.", -1};
             }
             // Url
-            if(!items.at(1).empty()) {
-                request.url = items.at(1);
+            auto url = tokens.at(1);
+                // Parameter
+            if(const auto param_offset = url.find("?"); param_offset != std::string::npos) {
+                const auto params = Split(url.substr(param_offset+1), "&");
+                url = url.substr(0, param_offset);
+                for(const auto& param_str : params) {
+                    const auto param = Split(param_str, "=");
+                    if(param.size() == 2) {
+                        request.parameter.push_back({param.at(0), param.at(1)});
+                    }
+                }
             }
+            request.url = url;
 
-            const auto header_line = items.at(2);
             // Http Header
+            const auto header_line = tokens.at(2);
             if(header_line.find("HTTP") != std::string::npos) {
                 const auto version = header_line.find("/");
                 request.http_version = header_line.substr(version+1);
             } else {
                 throw ServerException{"No Http Header found", -2};
             }
+
+
         } catch(const std::out_of_range& e) {
             lLog(lWarn) << e.what();
             throw ServerException{"Http Parsing failed", -3};
+        }
+    }
+
+    void HttpParser::parseHeaderLine(Request& request, const std::string& line) const {
+        try {
+            const auto header = Split(line, ":");
+            const auto key = header.at(0);
+            const auto value = header.at(1);
+
+            if(key.find("Host") != std::string::npos) {
+                request.host = value;
+            } else if(key.find("User-Agent") != std::string::npos) {
+                request.user_agent = value;
+            } else if(key.find("Accept-Language") != std::string::npos) {
+                request.accept_language = value;
+            } else if(key.find("Accept-Encoding") != std::string::npos) {
+                if(value.find("gzip") != std::string::npos) {
+                    request.accept_encoding = types::AcceptEncoding::gzip;
+                } else if(value.find("deflat") != std::string::npos) {
+                    request.accept_encoding = types::AcceptEncoding::deflat;
+                } else {
+                    request.accept_encoding = types::AcceptEncoding::deflat;
+                }
+            } else if(key.find("Connection") != std::string::npos) {
+                if(value.find("keep-alive") != std::string::npos) {
+                    request.connection = types::Connection::keep_alive;
+                } else if(value.find("deflat") != std::string::npos) {
+                    request.connection = types::Connection::close;
+                } else {
+                    request.connection = types::Connection::keep_alive;
+                }
+            } else if(key.find("Content-Type") != std::string::npos) {
+                if(value.find("application/json") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ApplicationJson;
+                } else if(value.find("application/pdf") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ApplicationPdf;
+                } else if(value.find("application/pxml") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ApplicationXhtmlXml;
+                } else if(value.find("application/octet-stream") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ApplicationOctetStream;
+                } else if(value.find("application/x-www-form-urlencoded") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ApplicationXWWWFormUrlEncode;
+                } else if(value.find("text/plain") != std::string::npos) {
+                    request.mime_type = types::MIMEType::TextPlain;
+                } else if(value.find("text/javascript") != std::string::npos) {
+                    request.mime_type = types::MIMEType::TextJs;
+                } else if(value.find("text/xml") != std::string::npos) {
+                    request.mime_type = types::MIMEType::TextXml;
+                } else if(value.find("text/css") != std::string::npos) {
+                    request.mime_type = types::MIMEType::TextCss;
+                } else if(value.find("text/html") != std::string::npos) {
+                    request.mime_type = types::MIMEType::TextHtml;
+                } else if(value.find("image/bmp") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ImageBmp;
+                } else if(value.find("image/jpeg") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ImageJpeg;
+                } else if(value.find("image/png") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ImagePng;
+                } else if(value.find("image/svg+xml") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ImageSvg;
+                } else if(value.find("image/gif") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ImageGIF;
+                } else if(value.find("image/vnd.microsoft.icon") != std::string::npos) {
+                    request.mime_type = types::MIMEType::ImageIco;
+                } else if(value.find("font/otf") != std::string::npos) {
+                    request.mime_type = types::MIMEType::FontOtf;
+                }else if(value.find("font/eot") != std::string::npos) {
+                    request.mime_type = types::MIMEType::FontEot;
+                }else if(value.find("font/woff") != std::string::npos) {
+                    request.mime_type = types::MIMEType::FontWoff;
+                }else if(value.find("font/woff2") != std::string::npos) {
+                    request.mime_type = types::MIMEType::FontWoff2;
+                }else if(value.find("font/ttf") != std::string::npos) {
+                    request.mime_type = types::MIMEType::FontTtf;
+                } else {
+                    request.mime_type = types::MIMEType::TextPlain;
+                }
+            } else {
+                lLog(lWarn) << "Header not known: " << line;
+            }
+        } catch(const std::out_of_range& e) {
+            lLog(lWarn) << e.what();
+            throw ServerException{"Invalid Header", -1};
         }
     }
 }

@@ -16,6 +16,7 @@ namespace webserver::util {
         types::MIMEType mime_type;
         types::Charset charset;
         std::string url;
+        std::vector<std::pair<std::string,std::string>> parameter;
         std::vector<unsigned char> payload;
     };
 
@@ -23,6 +24,7 @@ namespace webserver::util {
     private:
         std::string getLineEnding(const std::string& data) const;
         void parseFirstLine(Request& request, const std::string& line) const;
+        void parseHeaderLine(Request& request, const std::string& line) const;
     public:
         Request Parse(const std::string& data) const;
 

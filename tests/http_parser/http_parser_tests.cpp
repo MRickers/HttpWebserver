@@ -14,6 +14,38 @@ TEST(HttpParser, NoLineEnding) {
 	ASSERT_THROW(parser.Parse(http_header), ServerException);
 }
 
+TEST(HttpParser, NoMethod) {
+	const auto http_header = "/hallo.html HTTP/1.1\n\r";
+
+	HttpParser parser;
+
+	ASSERT_THROW(parser.Parse(http_header), ServerException);
+}
+
+TEST(HttpParser, NoHttpVersion) {
+	const auto http_header = "GET /hallo.html /1.1\n\r";
+
+	HttpParser parser;
+
+	ASSERT_THROW(parser.Parse(http_header), ServerException);
+}
+
+TEST(HttpParser, NoUrl) {
+	const auto http_header = "GET HTTP/1.1\n\r";
+
+	HttpParser parser;
+
+	ASSERT_THROW(parser.Parse(http_header), ServerException);
+}
+
+TEST(HttpParser, Trash) {
+	const auto http_header = "hello abcd cdef \n\r";
+
+	HttpParser parser;
+
+	ASSERT_THROW(parser.Parse(http_header), ServerException);
+}
+
 TEST(HttpParser, ParseHeader1) {
 	const auto http_header = "GET /hallo.html HTTP/1.1\n\r";
 
@@ -25,6 +57,75 @@ TEST(HttpParser, ParseHeader1) {
 	ASSERT_EQ(request.method, HttpMethod::Get);
 	ASSERT_STREQ(request.url.c_str(), "/hallo.html");
 	ASSERT_STREQ(request.http_version.c_str(), "1.1");
+}
+
+TEST(HttpParser, ParseHeader2) {
+	const auto http_header = "POST /path/to/html HTTP/1.2\n\r";
+
+	HttpParser parser;
+
+	ASSERT_NO_THROW(parser.Parse(http_header));
+	const auto request = parser.Parse(http_header);
+
+	ASSERT_EQ(request.method, HttpMethod::Post);
+	ASSERT_STREQ(request.url.c_str(), "/path/to/html");
+	ASSERT_STREQ(request.http_version.c_str(), "1.2");
+}
+
+TEST(HttpParser, ParseHeader3) {
+	const auto http_header = "PUT /path/to/index.html HTTP/2.0\n\r";
+
+	HttpParser parser;
+
+	ASSERT_NO_THROW(parser.Parse(http_header));
+	const auto request = parser.Parse(http_header);
+
+	ASSERT_EQ(request.method, HttpMethod::Post);
+	ASSERT_STREQ(request.url.c_str(), "/path/to/index.html");
+	ASSERT_STREQ(request.http_version.c_str(), "2.0");
+}
+
+TEST(HttpParser, ParseHeader4) {
+	const auto http_header = "DELETE /path/to/index.html HTTP/2.0\n\r";
+
+	HttpParser parser;
+
+	ASSERT_NO_THROW(parser.Parse(http_header));
+	const auto request = parser.Parse(http_header);
+
+	ASSERT_EQ(request.method, HttpMethod::Delete);
+	ASSERT_STREQ(request.url.c_str(), "/path/to/index.html");
+	ASSERT_STREQ(request.http_version.c_str(), "2.0");
+}
+
+TEST(HttpParser, ParseHeader5) {
+	const auto http_header = "UPDATE /path/to/index.html HTTP/2.0\n\r";
+
+	HttpParser parser;
+
+	ASSERT_NO_THROW(parser.Parse(http_header));
+	const auto request = parser.Parse(http_header);
+
+	ASSERT_EQ(request.method, HttpMethod::Update);
+	ASSERT_STREQ(request.url.c_str(), "/path/to/index.html");
+	ASSERT_STREQ(request.http_version.c_str(), "2.0");
+}
+
+TEST(HttpParser, ParseHeader6) {
+	const auto http_header = "GET /path/to/index.html?hello=there&general=kenobi HTTP/1.1\n\r";
+
+	HttpParser parser;
+
+	ASSERT_NO_THROW(parser.Parse(http_header));
+	const auto request = parser.Parse(http_header);
+
+	ASSERT_EQ(request.method, HttpMethod::Get);
+	ASSERT_STREQ(request.url.c_str(), "/path/to/index.html");
+	ASSERT_STREQ(request.http_version.c_str(), "1.1");
+	ASSERT_STREQ(request.parameter.at(0).first.c_str(), "hello");
+	ASSERT_STREQ(request.parameter.at(0).second.c_str(), "there");
+	ASSERT_STREQ(request.parameter.at(1).first.c_str(), "general");
+	ASSERT_STREQ(request.parameter.at(1).second.c_str(), "kenobi");
 }
 
 TEST(HttpParser, Parse) {
