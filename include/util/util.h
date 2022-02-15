@@ -1,5 +1,6 @@
 #pragma once
-#include <socket/socket.h>
+#include <vector>
+#include <string>
 
 namespace webserver::util {
     class ServerException : public std::exception {
@@ -20,5 +21,7 @@ namespace webserver::util {
 	};
 
 	std::vector<std::string> Split(const std::string& str, const std::string delimeter);
+
+	std::string Trim(const std::string& str);
 
 }

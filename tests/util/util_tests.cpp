@@ -53,6 +53,36 @@ TEST(SplitTests, Split5) {
     }
 }
 
+TEST(TrimTests, Trim1) {
+    using namespace webserver::util;
+
+    std::string data = " hello ";
+
+    const auto trimmed = Trim(data);
+
+    ASSERT_STREQ("hello", trimmed.c_str());
+}
+
+TEST(TrimTests, Trim2) {
+    using namespace webserver::util;
+    
+    std::string data = " \nhello\r ";
+
+    const auto trimmed = Trim(data);
+
+    ASSERT_STREQ("hello", trimmed.c_str());
+}
+
+TEST(TrimTests, Trim3) {
+    using namespace webserver::util;
+    
+    std::string data = " \nhello there\t\t ";
+
+    const auto trimmed = Trim(data);
+
+    ASSERT_STREQ("hello there", trimmed.c_str());
+}
+
 int main(int argc, char* argv[]) {
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
