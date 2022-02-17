@@ -17,9 +17,23 @@ namespace webserver::util {
             start_index = found+delimeter.size();
 			found = str.find(delimeter, found+delimeter.size());
 		}
-        vec.push_back(str.substr(start_index));
+        if(const auto last = Trim(str.substr(start_index)); !last.empty()) {
+            vec.push_back(last);
+        }
+
 		return vec;
 	}
+
+    std::pair<std::string,std::string> SplitOnce(const std::string& str, const std::string delimeter) {
+        if(str.empty()) {
+            return {};
+        }
+        const size_t found = str.find(delimeter);
+        if(found == std::string::npos) {
+            return {};
+        }
+        return std::make_pair(str.substr(0, found), str.substr(found+1));
+    }
 
     std::string Trim(const std::string& str) {
         const auto front = std::find_if_not(str.begin(), str.end(), [](unsigned char c) {
@@ -28,8 +42,8 @@ namespace webserver::util {
 
         const auto back = std::find_if_not(str.rbegin(), str.rend(), [](unsigned char c) {
             return (std::isspace(c) || std::iscntrl(c));
-        });
+        }).base();
 
-        return std::string{front, back.base()};
+        return (back<=front ? std::string() : std::string{front, back});
     }
 }

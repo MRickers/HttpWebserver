@@ -53,6 +53,20 @@ TEST(SplitTests, Split5) {
     }
 }
 
+TEST(SplitTests, Split6) {
+    std::string data = "hello\n\rhow\n\rare\n\ryou\n\r\n\r?";
+    std::string delimeter = {0x0D, 0x0A};
+
+    const auto items = webserver::util::Split(data, delimeter);
+
+    ASSERT_STREQ("hello", items.at(0).c_str());
+    ASSERT_STREQ("how", items.at(1).c_str());
+    ASSERT_STREQ("are", items.at(2).c_str());
+    ASSERT_STREQ("you", items.at(3).c_str());
+    ASSERT_STREQ("", items.at(4).c_str());
+    ASSERT_STREQ("?", items.at(5).c_str());
+}
+
 TEST(TrimTests, Trim1) {
     using namespace webserver::util;
 
@@ -81,6 +95,16 @@ TEST(TrimTests, Trim3) {
     const auto trimmed = Trim(data);
 
     ASSERT_STREQ("hello there", trimmed.c_str());
+}
+
+TEST(TrimTests, Trim4) {
+    using namespace webserver::util;
+    
+    std::string data = "  ";
+
+    const auto trimmed = Trim(data);
+
+    ASSERT_TRUE(trimmed.empty());
 }
 
 int main(int argc, char* argv[]) {

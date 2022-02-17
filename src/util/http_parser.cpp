@@ -2,8 +2,11 @@
 #include <util/util.h>
 #include <util/types.h>
 #include <logging/logging.h>
+#include <utility>
+#include <iterator>
 
 namespace webserver::util {
+    static constexpr uint32_t MAX_HEADER_SIZE = 64;
     static constexpr char CR = 0x0D;
     static constexpr char LF = 0x0A;
 
@@ -15,23 +18,38 @@ namespace webserver::util {
         // determine line endings
         const std::string line_ending = getLineEnding(data);
         // split string in lines
-        const auto lines = Split(data, line_ending);
-        Request request;
-        bool first_line = false;
+        auto lines = Split(data, line_ending);
 
-        lLog(lDebug) << "Parsing Http Request";
-        for(const auto& line : lines) {
-            if(!first_line) {
-                // parse first line
-                parseFirstLine(request, line);
-                first_line = true;
-            }
-
-
-
+        if(lines.size() > MAX_HEADER_SIZE) {
+            std::string msg = "To much header lines: " + std::to_string(lines.size());
+            lLog(lError) << msg;
+            throw ServerException{msg, -1};
         }
+        lLog(lDebug) << "Found " << lines.size() << " lines";
 
-        return request;
+        try {
+            Request request;
+            if(lines.empty()) {
+                lLog(lWarn) << "Lines empty.";
+                return request;
+            }
+            const auto first_line = lines.front();
+
+            lLog(lDebug) << "Parsing first line: " << first_line;
+            parseFirstLine(request, first_line);
+            lines.erase(lines.begin());
+
+            for(const auto& line : lines) {
+                if(parseHeaderLine(request, line)) {
+                    parsePayload(request, lines.back());
+                    return request;
+                }
+            }
+            return request;
+        } catch(const std::out_of_range& e) {
+            lLog(lError) << e.what();
+            throw ServerException{e.what(), -1};
+        }
     }
 
     std::string HttpParser::getLineEnding(const std::string& data) const {
@@ -42,7 +60,7 @@ namespace webserver::util {
         } else if(data.find(MAC_ENDINGS) != std::string::npos) {
             return MAC_ENDINGS;
         } else {
-            lLog(lDebug) << "Invalid line ending";
+            lLog(lError) << "Invalid line ending";
             throw ServerException{"Invalid line ending", -1};
         }
     }
@@ -51,6 +69,7 @@ namespace webserver::util {
         try {
             const auto tokens = Split(line, " ");
             if(tokens.size() != 3) {
+                lLog(lError) << "Token size != 3. Http Protocol invalid";
                 throw ServerException{"Http Protocol invalid", -1};
             }
             // Method
@@ -63,6 +82,7 @@ namespace webserver::util {
             } else if(tokens.at(0).find("DELETE")!= std::string::npos) {
                 request.method = types::HttpMethod::Delete;
             } else {
+                lLog(lError) << "No Http Method found.";
                 throw ServerException{"No Http Method found.", -1};
             }
             // Url
@@ -74,7 +94,12 @@ namespace webserver::util {
                 for(const auto& param_str : params) {
                     const auto param = Split(param_str, "=");
                     if(param.size() == 2) {
-                        request.parameter.push_back({param.at(0), param.at(1)});
+                        const auto& key = Trim(param.at(0));
+                        const auto& value = Trim(param.at(1));
+
+                        if(!key.empty() && !value.empty()) {
+                            request.parameter.push_back({param.at(0), param.at(1)});
+                        }
                     }
                 }
             }
@@ -96,11 +121,29 @@ namespace webserver::util {
         }
     }
 
-    void HttpParser::parseHeaderLine(Request& request, const std::string& line) const {
+    void HttpParser::parsePayload(Request& request, const std::string& line) const {
+        if(!line.empty()) {
+            if(const auto line_trimmed = Trim(line); !line_trimmed.empty()) {
+                std::copy(line_trimmed.begin(), line_trimmed.end(),  std::back_inserter(request.payload));
+            }
+        }
+    }
+
+    bool HttpParser::parseHeaderLine(Request& request, const std::string& line) const {
         try {
-            const auto header = Split(line, ":");
-            const auto key = header.at(0);
-            const auto value = header.at(1);
+            if(line.empty()) {
+                return true;
+            }
+
+            const auto header = SplitOnce(line, ":");
+            
+            // payload line incoming
+            if(header.first.empty()) {
+                return false;
+            }
+
+            const auto key = Trim(header.first);
+            const auto value = Trim(header.second);
 
             if(key.find("Host") != std::string::npos) {
                 request.host = value;
@@ -108,6 +151,16 @@ namespace webserver::util {
                 request.user_agent = value;
             } else if(key.find("Accept-Language") != std::string::npos) {
                 request.accept_language = value;
+            } else if(key.find("Accept-Charset") != std::string::npos) { 
+                if(value.find("utf-8") != std::string::npos) {
+                    request.charset = types::Charset::utf8;
+                } else if(value.find("utf-16") != std::string::npos) {
+                    request.charset = types::Charset::utf16;
+                } else if(value.find("ascii") != std::string::npos) {
+                    request.charset = types::Charset::ascii;
+                } else {
+                    request.charset = types::Charset::ascii;
+                }
             } else if(key.find("Accept-Encoding") != std::string::npos) {
                 if(value.find("gzip") != std::string::npos) {
                     request.accept_encoding = types::AcceptEncoding::gzip;
@@ -170,12 +223,37 @@ namespace webserver::util {
                 } else {
                     request.mime_type = types::MIMEType::TextPlain;
                 }
+
+                if(const auto charset = value.find("charset"); charset != std::string::npos) {
+                    if(value.find("UTF-8", charset) != std::string::npos) {
+                        request.charset = types::Charset::utf8;
+                    } else if(value.find("UTF-16", charset) != std::string::npos) {
+                        request.charset = types::Charset::utf16;
+                    } else if(value.find("ASCII", charset) != std::string::npos) {
+                        request.charset = types::Charset::ascii;
+                    } else {
+                        request.charset = types::Charset::ascii;
+                    }
+                } else {
+                    request.charset = types::Charset::ascii;
+                }
+            } else if(key.find("Content-Length") != std::string::npos) {
+                try {
+                    request.content_length = std::stoul(value);
+                } catch(const std::invalid_argument& e) {
+                    lLog(lInfo) << "Could not convert Content-Length: " << value << ". Setting default 0";
+                    request.content_length = 0;
+                } catch(const std::out_of_range& e) {
+                    lLog(lInfo) << "Content-Length overflow. Setting default 0";
+                    request.content_length = 0;
+                }
             } else {
-                lLog(lWarn) << "Header not known: " << line;
+                lLog(lInfo) << "Header not known: " << key << ":" << value;
             }
         } catch(const std::out_of_range& e) {
             lLog(lWarn) << e.what();
             throw ServerException{"Invalid Header", -1};
         }
+        return false;
     }
 }

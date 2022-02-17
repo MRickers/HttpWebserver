@@ -14,6 +14,7 @@ namespace webserver::util {
         types::Connection connection;
         std::string cookie;
         types::MIMEType mime_type;
+        uint32_t content_length;
         types::Charset charset;
         std::string url;
         std::vector<std::pair<std::string,std::string>> parameter;
@@ -24,7 +25,8 @@ namespace webserver::util {
     private:
         std::string getLineEnding(const std::string& data) const;
         void parseFirstLine(Request& request, const std::string& line) const;
-        void parseHeaderLine(Request& request, const std::string& line) const;
+        bool parseHeaderLine(Request& request, const std::string& line) const;
+        void parsePayload(Request& request, const std::string& line) const;
     public:
         Request Parse(const std::string& data) const;
 
