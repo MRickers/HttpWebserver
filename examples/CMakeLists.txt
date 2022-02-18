@@ -37,6 +37,8 @@ ${CMAKE_SOURCE_DIR}/src/multiplexer/request_handler_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/server/server.cpp
 ${CMAKE_SOURCE_DIR}/src/server/url_router.cpp
 ${CMAKE_SOURCE_DIR}/src/server/url_router_factory.cpp
+${CMAKE_SOURCE_DIR}/src/util/util.cpp
+${CMAKE_SOURCE_DIR}/src/util/http_parser.cpp
 ${SOCKET_SOURCES})
 target_include_directories(dispatcher_example  PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(dispatcher_example  $<$<PLATFORM_ID:Windows>:wsock32> $<$<PLATFORM_ID:Windows>:ws2_32>)

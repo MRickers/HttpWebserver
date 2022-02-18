@@ -207,6 +207,21 @@ TEST(HttpParser, Parse3) {
 	ASSERT_EQ(17, request.content_length);
 }
 
+
+TEST(HttpParser, Parse4) {
+	using namespace webserver;
+
+	const auto http_msg = "GET / HTTP/1.1\r\nHost: localhost:30001\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0\r\nContent-Type: text/plain;charset=ASCII\r\nContent-Length: 17\r\n\r\nObi-Wan 'Ben' Kenobi is a fictional character in the Star Wars franchise. Within the original trilogy, Obi-Wan is a Jedi Master as a supporting character and is portrayed by English actor Alec Guinness. In the later-released prequel trilogy, a younger version of the character serves as one of the two main protagonists, alongside Anakin Skywalker, and is portrayed by Scottish actor Ewan McGregor. In the original trilogy, he is a mentor to Luke Skywalker, to whom he introduces the ways of the Jedi. After sacrificing himself in a duel against Darth Vader, Obi-Wan guides Luke through the Force in his fight against the Galactic Empire. In the prequel trilogy, set decades earlier, he is initially a Padawan (apprentice) to Jedi Master Qui-Gon Jinn, and later mentor and friend of Luke's father Anakin, who falls to the dark side of the Force and becomes Vader. The character briefly appears in the sequel trilogy as a disembodied voice, speaking to protagonist Rey. He is frequently featured as a main character in various other Star Wars media.";
+	HttpParser parser;
+	
+	ASSERT_NO_THROW(parser.Parse(http_msg));
+	const auto request = parser.Parse(http_msg);
+
+	std::string payload{request.payload.begin(), request.payload.end()};
+	ASSERT_STREQ("Obi-Wan 'Ben' Kenobi is a fictional character in the Star Wars franchise. Within the original trilogy, Obi-Wan is a Jedi Master as a supporting character and is portrayed by English actor Alec Guinness. In the later-released prequel trilogy, a younger version of the character serves as one of the two main protagonists, alongside Anakin Skywalker, and is portrayed by Scottish actor Ewan McGregor. In the original trilogy, he is a mentor to Luke Skywalker, to whom he introduces the ways of the Jedi. After sacrificing himself in a duel against Darth Vader, Obi-Wan guides Luke through the Force in his fight against the Galactic Empire. In the prequel trilogy, set decades earlier, he is initially a Padawan (apprentice) to Jedi Master Qui-Gon Jinn, and later mentor and friend of Luke's father Anakin, who falls to the dark side of the Force and becomes Vader. The character briefly appears in the sequel trilogy as a disembodied voice, speaking to protagonist Rey. He is frequently featured as a main character in various other Star Wars media.", payload.c_str());
+	ASSERT_EQ(17, request.content_length);
+}
+
 int main(int argc, char* argv[]) {
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
