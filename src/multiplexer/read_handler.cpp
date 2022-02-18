@@ -3,6 +3,7 @@
 #include <factories/socket_factory.h>
 #include <util/http_parser.h>
 #include <util/util.h>
+#include <util/duration.h>
 
 namespace webserver::multiplexer {
 	ReadRequestHandler::ReadRequestHandler(FdQueue queue) : queue_(queue) {
@@ -12,6 +13,7 @@ namespace webserver::multiplexer {
 	void ReadRequestHandler::HandleRequest(int fd) {
 		try {
 			const auto socket = webserver::sock::SocketFactory().Create((int16_t)fd);
+			auto timer = webserver::util::Duration{};
 
 			const auto [recv_result, data] = socket->Receive();
 
@@ -48,6 +50,11 @@ namespace webserver::multiplexer {
 				return;
 			}
 			queue_->Push((int16_t)fd);
+
+			timer.Stop();
+			const auto dt = timer.GetTime();
+
+			lLog(lInfo) << "Request took " << dt << " ms";
 
 		} catch(const webserver::util::ServerException& e) {
 			lLog(lError) << e.what();
