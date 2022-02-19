@@ -38,7 +38,8 @@ ${CMAKE_SOURCE_DIR}/src/server/server.cpp
 ${CMAKE_SOURCE_DIR}/src/server/url_router.cpp
 ${CMAKE_SOURCE_DIR}/src/server/url_router_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/util/util.cpp
-${CMAKE_SOURCE_DIR}/src/util/http_parser.cpp
+${CMAKE_SOURCE_DIR}/src/server/http_parser.cpp
+${CMAKE_SOURCE_DIR}/src/server/http_response.cpp
 ${CMAKE_SOURCE_DIR}/src/util/duration.cpp
 ${SOCKET_SOURCES})
 target_include_directories(dispatcher_example  PRIVATE ${CMAKE_SOURCE_DIR}/include)

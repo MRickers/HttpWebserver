@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
-#include <util/http_parser.h>
-#include <util/types.h>
+#include <server/http/parser.h>
 #include <util/util.h>
 
 using namespace webserver::util;

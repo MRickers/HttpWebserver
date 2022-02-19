@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 #include <util/util.h>
+#include <util/datetime.h>
+#include <logging/logging.h>
 
 TEST(SplitTests, Split1) {
     std::string data = "hello;how;are;you;?";
@@ -54,7 +56,7 @@ TEST(SplitTests, Split5) {
 }
 
 TEST(SplitTests, Split6) {
-    std::string data = "hello\n\rhow\n\rare\n\ryou\n\r\n\r?";
+    std::string data = "hello\r\nhow\r\nare\r\nyou\r\n\r\n?";
     std::string delimeter = {0x0D, 0x0A};
 
     const auto items = webserver::util::Split(data, delimeter);
@@ -105,6 +107,19 @@ TEST(TrimTests, Trim4) {
     const auto trimmed = Trim(data);
 
     ASSERT_TRUE(trimmed.empty());
+}
+
+TEST(Datetime, Date1) {
+    using namespace webserver::util;
+
+    Datetime date{};
+
+    ASSERT_NO_THROW(date.DateLocal("%a, %d %b %Y %H:%M:%S %Z"));
+    ASSERT_NO_THROW(date.DateGMT("%a, %d %b %Y %H:%M:%S %Z"));
+    ASSERT_NO_THROW(date.DateHTTPFormat());
+    lLog(lInfo) << date.DateLocal("%a, %d %b %Y %H:%M:%S %Z");
+    lLog(lInfo) << date.DateGMT("%a, %d %b %Y %H:%M:%S %Z");
+    lLog(lInfo) << date.DateHTTPFormat();
 }
 
 int main(int argc, char* argv[]) {

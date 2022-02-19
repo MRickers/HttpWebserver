@@ -5,10 +5,10 @@
 #include <functional>
 #include <server/http/request.h>
 #include <server/http/response.h>
-#include <util/types.h>
+#include <server/http/types.h>
 
 namespace webserver {
-	using RequestHandler = std::function<http::HttpResponse(const http::HttpRequest& request)>;
+	using RequestHandler = std::function<http::Response(const http::Request& request)>;
 	using RequestHandlerContainer = std::unordered_map<std::string, RequestHandler>;
 
 	class IRouter {

@@ -1,7 +1,6 @@
-#include <util/http_parser.h>
-#include <util/util.h>
-#include <util/types.h>
+#include <server/http/parser.h>
 #include <logging/logging.h>
+#include <util/util.h>
 #include <utility>
 #include <iterator>
 
@@ -14,7 +13,7 @@ namespace webserver::util {
     static const std::string UNIX_ENDINGS = {LF};
     static const std::string MAC_ENDINGS = {CR};
 
-    Request HttpParser::Parse(const std::string& data) const {
+    http::Request HttpParser::Parse(const std::string& data) const {
         // determine line endings
         const std::string line_ending = getLineEnding(data);
         // split string in lines
@@ -28,7 +27,7 @@ namespace webserver::util {
         lLog(lDebug) << "Found " << lines.size() << " lines";
 
         try {
-            Request request;
+            http::Request request;
             if(lines.empty()) {
                 lLog(lWarn) << "Lines empty.";
                 return request;
@@ -65,7 +64,7 @@ namespace webserver::util {
         }
     }
 
-    void HttpParser::parseFirstLine(Request& request, const std::string& line) const {
+    void HttpParser::parseFirstLine(http::Request& request, const std::string& line) const {
         try {
             const auto tokens = Split(line, " ");
             if(tokens.size() != 3) {
@@ -121,7 +120,7 @@ namespace webserver::util {
         }
     }
 
-    void HttpParser::parsePayload(Request& request, const std::string& line) const {
+    void HttpParser::parsePayload(http::Request& request, const std::string& line) const {
         if(!line.empty()) {
             if(const auto line_trimmed = Trim(line); !line_trimmed.empty()) {
                 std::copy(line_trimmed.begin(), line_trimmed.end(),  std::back_inserter(request.payload));
@@ -129,7 +128,7 @@ namespace webserver::util {
         }
     }
 
-    bool HttpParser::parseHeaderLine(Request& request, const std::string& line) const {
+    bool HttpParser::parseHeaderLine(http::Request& request, const std::string& line) const {
         try {
             if(line.empty()) {
                 return true;
