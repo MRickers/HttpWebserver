@@ -1,6 +1,15 @@
 #pragma once
+#include <string>
 
 namespace webserver::types {
+    constexpr uint32_t MAX_HEADER_SIZE = 64;
+    constexpr char CR = 0x0D;
+    constexpr char LF = 0x0A;
+
+    const std::string WINDOWS_ENDINGS = {CR, LF}; 
+    const std::string UNIX_ENDINGS = {LF};
+    const std::string MAC_ENDINGS = {CR};
+
     enum class HttpMethod : uint16_t {
 		Get,
 		Post,
@@ -79,13 +88,13 @@ namespace webserver::types {
         MethodNotAllowed = 405,
         RequestTimeout = 408,
         LengthRequired = 411,
-        PayloadToLarge = 413,
+        PayloadTooLarge = 413,
         UriTooLong = 414,
         UnsuportedMIMEType = 415,
         TooManyRequests = 429,
         RequestHeaderFieldsTooLarge = 431,
 
-        InternalErro = 500,
+        InternalError = 500,
         NotImplemented = 501,
         ServerUnavailable = 503,
         HttpVersionNotSupported = 505,

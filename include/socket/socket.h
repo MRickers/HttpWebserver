@@ -53,9 +53,9 @@ namespace webserver::sock {
 		virtual void Connect(const std::string& host, uint32_t port) = 0;
 		virtual void ConnectTimeout(const std::string& host, uint32_t port, uint32_t timeout_ms) = 0;
 		virtual void Close() = 0;
-		virtual Result<int32_t> Send(const std::vector<char>& data) const = 0;
+		virtual Result<int32_t> Send(const std::vector<unsigned char>& data) const = 0;
 		virtual Result<int32_t> Send(const std::string& data) const = 0;
-		virtual Result<std::vector<char>> Receive() const = 0;
+		virtual Result<std::vector<unsigned char>> Receive() const = 0;
 
 		virtual void Bind(uint32_t port) = 0;
 		virtual void Listen() = 0;

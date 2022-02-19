@@ -210,7 +210,7 @@ namespace webserver::sock {
         return Send(std::vector<char>{ data.begin(), data.end() });
     }
 
-    Result<int32_t> WindowsSocketTcp::Send(const std::vector<char>& data) const {
+    Result<int32_t> WindowsSocketTcp::Send(const std::vector<unsigned char>& data) const {
         int32_t sent = 0;
 
         if ((sent = send(socket_, data.data(), data.size(), 0)) == SOCKET_ERROR) {

@@ -1,25 +1,18 @@
 #include <server/http/parser.h>
 #include <logging/logging.h>
 #include <util/util.h>
+#include <server/http/types.h>
 #include <utility>
 #include <iterator>
 
 namespace webserver::util {
-    static constexpr uint32_t MAX_HEADER_SIZE = 64;
-    static constexpr char CR = 0x0D;
-    static constexpr char LF = 0x0A;
-
-    static const std::string WINDOWS_ENDINGS = {CR, LF}; 
-    static const std::string UNIX_ENDINGS = {LF};
-    static const std::string MAC_ENDINGS = {CR};
-
     http::Request HttpParser::Parse(const std::string& data) const {
         // determine line endings
         const std::string line_ending = getLineEnding(data);
         // split string in lines
         auto lines = Split(data, line_ending);
 
-        if(lines.size() > MAX_HEADER_SIZE) {
+        if(lines.size() > types::MAX_HEADER_SIZE) {
             std::string msg = "To much header lines: " + std::to_string(lines.size());
             lLog(lError) << msg;
             throw ServerException{msg, -1};
@@ -52,12 +45,12 @@ namespace webserver::util {
     }
 
     std::string HttpParser::getLineEnding(const std::string& data) const {
-        if(data.find(WINDOWS_ENDINGS) != std::string::npos) {
-            return WINDOWS_ENDINGS;
-        } else if(data.find(UNIX_ENDINGS) != std::string::npos) {
-            return UNIX_ENDINGS;
-        } else if(data.find(MAC_ENDINGS) != std::string::npos) {
-            return MAC_ENDINGS;
+        if(data.find(types::WINDOWS_ENDINGS) != std::string::npos) {
+            return types::WINDOWS_ENDINGS;
+        } else if(data.find(types::UNIX_ENDINGS) != std::string::npos) {
+            return types::UNIX_ENDINGS;
+        } else if(data.find(types::MAC_ENDINGS) != std::string::npos) {
+            return types::MAC_ENDINGS;
         } else {
             lLog(lError) << "Invalid line ending";
             throw ServerException{"Invalid line ending", -1};

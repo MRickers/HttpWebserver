@@ -174,10 +174,10 @@ namespace webserver::sock {
 	}
 
     Result<int32_t> LinuxSocketTcp::Send(const std::string& data) const {
-        return Send(std::vector<char>{ data.begin(), data.end() });
+        return Send(std::vector<unsigned char>{ data.begin(), data.end() });
     }
 
-    Result<int32_t> LinuxSocketTcp::Send(const std::vector<char>& data) const {
+    Result<int32_t> LinuxSocketTcp::Send(const std::vector<unsigned char>& data) const {
         int32_t sent=0;
         if((sent = send(socket_, data.data(), data.size(), 0)) < 0) {
             lLog(lError) << "SendTcp error: " << errno << " " << strerror(errno);
@@ -186,18 +186,18 @@ namespace webserver::sock {
         return Result<int32_t>{SocketResult::OK, sent};
 	}
 
-    Result<std::vector<char>> LinuxSocketTcp::Receive() const {
+    Result<std::vector<unsigned char>> LinuxSocketTcp::Receive() const {
         const uint16_t receive_size = 0x8000;
         int16_t received = 0;
-        std::vector<char> vec;
+        std::vector<unsigned char> vec;
         vec.resize(receive_size);
 
         if((received = recv(socket_, vec.data(), receive_size, 0)) <= 0) {
             lLog(lError) << "ReceiveTcp error: " << errno << " " << strerror(errno);
-            return Result<std::vector<char>>{SocketResult::DEFAULTERROR, std::vector<char>{}};
+            return Result<std::vector<unsigned char>>{SocketResult::DEFAULTERROR, std::vector<unsigned char>{}};
         }
         vec.resize(received);
-        return Result<std::vector<char>>{SocketResult::OK, vec};
+        return Result<std::vector<unsigned char>>{SocketResult::OK, vec};
 	}
 
 	void LinuxSocketTcp::Bind(uint32_t port) {

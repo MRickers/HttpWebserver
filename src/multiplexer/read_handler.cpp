@@ -2,6 +2,7 @@
 #include <logging/logging.h>
 #include <factories/socket_factory.h>
 #include <server/http/parser.h>
+#include <server/http/response.h>
 #include <util/util.h>
 #include <util/duration.h>
 
@@ -42,7 +43,16 @@ namespace webserver::multiplexer {
 			}
 			// find callback 
 
-			const auto [sent_result, sent] = socket->Send(data);
+			lLog(lDebug) << "Creating response";
+			webserver::http::Response response;
+			response.ContentType(types::MIMEType::ApplicationJson);
+			response.StatusCode(types::HttpStatusCode::OK);
+			response.Payload("{\"hello\":\"there\"}");
+
+			const auto res = response.Format();
+
+			lLog(lDebug) << "Sending response " << std::endl << std::string{res.cbegin(), res.cend()};
+			const auto [sent_result, sent] = socket->Send(res);
 
 			if (sent_result != webserver::sock::SocketResult::OK) {
 				lLog(lError) << "Sending failed " << static_cast<int>(sent_result);

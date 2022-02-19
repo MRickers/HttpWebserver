@@ -9,6 +9,9 @@ namespace webserver::http {
         std::vector<unsigned char> payload_;
         types::MIMEType content_type_;
         types::HttpStatusCode status_code_;
+
+        std::string toText(const types::MIMEType type) const;
+        std::string toText(const types::HttpStatusCode type) const;
     public:
         Response();
 

@@ -69,7 +69,7 @@ namespace logging {
 		{}
 
 		~Logger() {
-			*stream_ << sstream_.str() << std::endl;
+			*stream_ << sstream_.str() << std::endl << std::flush;
 		}
 
 		std::ostream& Get(const Loglevel level, const std::string& file, const uint32_t line) {
