@@ -1,6 +1,14 @@
 #pragma once
 #include <functional>
 #include <unordered_map>
+#if __GNUG__ == 7
+#include <experimental/filesystem>
+namespace filesystem = std::experimental::filesystem;
+#else
+#include <filesystem>
+namespace filesystem = std::filesystem;
+#endif
+
 #include <server/http/request.h>
 #include <server/http/response.h>
 
@@ -28,5 +36,5 @@ namespace  webserver
         void ServeAsset(const std::string& url, const std::string& path);
         RequestHandler GetHandler(const types::HttpMethod method, const std::string& url) const;
     };
-    
+    using RouterPtr = std::unique_ptr<UrlRouter>;
 } // namespace  webserver

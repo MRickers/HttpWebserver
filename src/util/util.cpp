@@ -63,29 +63,32 @@ namespace webserver::util {
 
         std::ifstream ifs(path, std::ios::binary);
         if (!ifs.is_open()) {
-            const int syserr = errno;
+            const int16_t syserr = errno;
             lLog(lError) << "Could not open file (" << syserr << ").";
             throw ServerException{"Could not open file", syserr};
         }
+        std::streampos file_size;
         std::vector<unsigned char> vec;
+
+        vec.reserve(file_size);
         std::copy(std::istream_iterator<unsigned char>(ifs), std::istream_iterator<unsigned char>(),
         std::back_inserter(vec));
-        ifs.close(),
+        ifs.close();
 
         if (ifs.fail() && !ifs.eof()) {
-            const int syserr = errno;        
-            throw wcon::Error(STREAM("logical i/o error on " << path), WCIERR_READ_FILE_IO, syserr);
+            const auto msg = "Logical i/o error on " + path.string();
+            const int16_t syserr = errno;        
+            throw ServerException{msg, syserr};
         }
 
         if (ifs.bad()) {
-            const int syserr = errno;        
-            throw ServerException{"read or write i/o error on " << path), WCIERR_READ_FILE_IO, syserr);
+            const auto msg = "Read or write i/o error on " + path.string();
+            const int16_t syserr = errno;        
+            throw ServerException{msg, syserr};
         }
 
-        if (buffer.empty())
-            throw wcon::Error("Empty buffer", WCIERR_READ_FILE_EMPTY);   
-
-        return buffer;
+        if (vec.empty())
+            throw ServerException{"Empty buffer", -1};   
 
         return vec;
     }
@@ -107,17 +110,44 @@ namespace webserver::util {
 
         std::ifstream ifs(path, std::ios::binary);
         if (!ifs.is_open()) {
-            const int syserr = errno;
+            const int16_t syserr = errno;
             lLog(lError) << "Could not open file (" << syserr << ").";
             throw ServerException{"Could not open file", syserr};
         }
         std::vector<unsigned char> vec;
+        std::vector<char> vec2(size);
         vec.reserve(size);
-        std::copy(std::istream_iterator<unsigned char>(ifs), std::istream_iterator<unsigned char>(),
-        std::back_inserter(vec));
+        while (ifs.read(vec2.data(), vec2.size()) ) {
+            // Find out how many characters were actually read.
+            if(const size_t count = ifs.gcount(); count >= size) {
+                lLog(lDebug) << "Breaking: " << count;
+                break;
+            }
+        }
+        lLog(lDebug) << "SIZE: " << vec2.size() << "VEC2: " << std::string{vec2.cbegin(), vec2.cend()};
+        if(vec.size() != size) {
+            const auto msg = "Read " + std::to_string(vec.size()) + "/" + std::to_string(size) + " bytes.";
+            lLog(lError) << msg;
+            ifs.close();
+            throw ServerException{msg, -2};
+        }
+        ifs.close();
+
+        if (ifs.fail() && !ifs.eof()) {
+            const auto msg = "Logical i/o error on " + path.string();
+            const int16_t syserr = errno;        
+            throw ServerException{msg, syserr};
+        }
+
+        if (ifs.bad()) {
+            const auto msg = "Read or write i/o error on " + path.string();
+            const int16_t syserr = errno;        
+            throw ServerException{msg, syserr};
+        }
+
+        if (vec.empty())
+            throw ServerException{"Empty buffer", -1};   
 
         return vec;
     }
-
-
 }

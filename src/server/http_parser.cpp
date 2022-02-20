@@ -184,8 +184,6 @@ namespace webserver::util {
                     request.mime_type = types::MIMEType::TextPlain;
                 } else if(value.find("text/javascript") != std::string::npos) {
                     request.mime_type = types::MIMEType::TextJs;
-                } else if(value.find("text/xml") != std::string::npos) {
-                    request.mime_type = types::MIMEType::TextXml;
                 } else if(value.find("text/css") != std::string::npos) {
                     request.mime_type = types::MIMEType::TextCss;
                 } else if(value.find("text/html") != std::string::npos) {

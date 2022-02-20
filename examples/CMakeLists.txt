@@ -36,13 +36,23 @@ ${CMAKE_SOURCE_DIR}/src/multiplexer/dispatcher_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/multiplexer/request_handler_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/server/server.cpp
 ${CMAKE_SOURCE_DIR}/src/server/url_router.cpp
-${CMAKE_SOURCE_DIR}/src/server/url_router_factory.cpp
 ${CMAKE_SOURCE_DIR}/src/util/util.cpp
 ${CMAKE_SOURCE_DIR}/src/util/duration.cpp
 ${CMAKE_SOURCE_DIR}/src/util/datetime.cpp
 ${CMAKE_SOURCE_DIR}/src/server/http_parser.cpp
 ${CMAKE_SOURCE_DIR}/src/server/http_response.cpp
+${CMAKE_SOURCE_DIR}/src/server/types.cpp
 ${SOCKET_SOURCES})
 target_include_directories(dispatcher_example  PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(dispatcher_example  $<$<PLATFORM_ID:Windows>:wsock32> $<$<PLATFORM_ID:Windows>:ws2_32>)
+
+add_executable(read_file_example
+src/read_file_example
+${CMAKE_SOURCE_DIR}/src/util/util.cpp)
+target_include_directories(read_file_example PRIVATE ${CMAKE_SOURCE_DIR}/include)
+add_custom_command(
+        TARGET read_file_example POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_SOURCE_DIR}/examples/src/test_file.html
+        ${CMAKE_CURRENT_BINARY_DIR}/test_file.html)
 endif()

@@ -8,7 +8,7 @@ namespace webserver {
 
         }
 
-        void UrlRouter::ServeAsset([[maybe_unused]]const std::string& url, [[maybe_unused]]const std::string& path) {
+        void UrlRouter::ServeAsset(const std::string& url, const std::string& path) {
             Register(types::HttpMethod::Get, url, [url, path, this](const http::Request request)->http::Response {
                 const auto childpath = request.url.substr(url.length()-1);
 
@@ -31,6 +31,7 @@ namespace webserver {
                 lLog(lError) << e.what();
                 response.StatusCode(types::HttpStatusCode::NotFound);
             }
+            return response;
         }
 
 		void UrlRouter::Register(const types::HttpMethod method, const std::string& url, RequestHandler callback) {

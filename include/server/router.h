@@ -19,5 +19,5 @@ namespace webserver {
 		virtual RequestHandler GetHandler(const types::HttpMethod method, const std::string& url) const = 0;
 	};
 	
-	using RouterPtr = std::unique_ptr<IRouter>;
+	//using RouterPtr = std::unique_ptr<IRouter>;
 }
