@@ -1,6 +1,14 @@
 #pragma once
 #include <vector>
 #include <string>
+#if __GNUG__ == 7
+#include <experimental/filesystem>
+namespace filesystem = std::experimental::filesystem;
+#else
+#include <filesystem>
+namespace filesystem = std::filesystem;
+#endif
+
 
 namespace webserver::util {
     class ServerException : public std::exception {
@@ -24,5 +32,10 @@ namespace webserver::util {
 	std::pair<std::string,std::string> SplitOnce(const std::string& str, const std::string delimeter);
 
 	std::string Trim(const std::string& str);
+
+	std::vector<unsigned char> ReadFile(const std::string& path);
+	std::vector<unsigned char> ReadFile(const filesystem::path& path);
+	std::vector<unsigned char> ReadFile(const std::string& path, const size_t size);
+	std::vector<unsigned char> ReadFile(const filesystem::path& path, const size_t size);
 
 }

@@ -93,13 +93,15 @@ namespace webserver::http {
             return "text/javascript";
         }  else if(type == types::MIMEType::TextPlain) {
             return "text/plain";
-        }  else if(type == types::MIMEType::TextXml) {
-            return "text/xml";
         }  else if(type == types::MIMEType::Unknown) {
             return "text/plain";
         }  else {
             return "text/plain";
         }
+    }
+
+    size_t Response::PayloadSize() const {
+        return payload_.size();
     }
 
     std::string Response::toText(const types::HttpStatusCode status) const {

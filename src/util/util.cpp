@@ -1,6 +1,9 @@
 #include <util/util.h>
 #include <logging/logging.h>
 #include <algorithm>
+#include <fstream>
+#include <iterator>
+
 namespace webserver::util {
     std::vector<std::string> Split(const std::string& str, const std::string delimeter) {
         if(str.empty()) {
@@ -46,4 +49,75 @@ namespace webserver::util {
 
         return (back<=front ? std::string() : std::string{front, back});
     }
+
+    std::vector<unsigned char> ReadFile(const std::string& path) {
+        return ReadFile(filesystem::path(path));
+    }
+
+	std::vector<unsigned char> ReadFile(const filesystem::path& path) {
+        if(!filesystem::exists(path)) {
+            const std::string msg = "File " + path.string() + "does not exist.";
+            lLog(lError) << "File " << path << " does not exist.";
+            throw ServerException{msg, -1};
+        }
+
+        std::ifstream ifs(path, std::ios::binary);
+        if (!ifs.is_open()) {
+            const int syserr = errno;
+            lLog(lError) << "Could not open file (" << syserr << ").";
+            throw ServerException{"Could not open file", syserr};
+        }
+        std::vector<unsigned char> vec;
+        std::copy(std::istream_iterator<unsigned char>(ifs), std::istream_iterator<unsigned char>(),
+        std::back_inserter(vec));
+        ifs.close(),
+
+        if (ifs.fail() && !ifs.eof()) {
+            const int syserr = errno;        
+            throw wcon::Error(STREAM("logical i/o error on " << path), WCIERR_READ_FILE_IO, syserr);
+        }
+
+        if (ifs.bad()) {
+            const int syserr = errno;        
+            throw ServerException{"read or write i/o error on " << path), WCIERR_READ_FILE_IO, syserr);
+        }
+
+        if (buffer.empty())
+            throw wcon::Error("Empty buffer", WCIERR_READ_FILE_EMPTY);   
+
+        return buffer;
+
+        return vec;
+    }
+
+    std::vector<unsigned char> ReadFile(const std::string& path, const size_t size) {
+        return ReadFile(filesystem::path(path), size);
+    }
+
+	std::vector<unsigned char> ReadFile(const filesystem::path& path, const size_t size) {
+        if(size == 0) {
+            return {};
+        }
+
+        if(!filesystem::exists(path)) {
+            const std::string msg = "File " + path.string() + "does not exist.";
+            lLog(lError) << "File " << path << " does not exist.";
+            throw ServerException{msg, -1};
+        }
+
+        std::ifstream ifs(path, std::ios::binary);
+        if (!ifs.is_open()) {
+            const int syserr = errno;
+            lLog(lError) << "Could not open file (" << syserr << ").";
+            throw ServerException{"Could not open file", syserr};
+        }
+        std::vector<unsigned char> vec;
+        vec.reserve(size);
+        std::copy(std::istream_iterator<unsigned char>(ifs), std::istream_iterator<unsigned char>(),
+        std::back_inserter(vec));
+
+        return vec;
+    }
+
+
 }

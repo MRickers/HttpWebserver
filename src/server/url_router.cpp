@@ -1,6 +1,7 @@
 #include <server/url_router.h>
 #include <logging/logging.h>
 #include <util/util.h>
+#include <server/http/types.h>
 
 namespace webserver {
     	UrlRouter::UrlRouter() : request_get_handlers_(), request_post_handlers_(), request_update_handlers_(), request_delete_handlers_() {
@@ -8,7 +9,28 @@ namespace webserver {
         }
 
         void UrlRouter::ServeAsset([[maybe_unused]]const std::string& url, [[maybe_unused]]const std::string& path) {
+            Register(types::HttpMethod::Get, url, [url, path, this](const http::Request request)->http::Response {
+                const auto childpath = request.url.substr(url.length()-1);
 
+                return this->serveFile(filesystem::path(filesystem::current_path() / path / childpath));
+            });
+        }
+
+        http::Response UrlRouter::serveFile(const filesystem::path& path) const {
+            http::Response response;
+            try {
+
+                response.ContentType(types::findMimeType(path.extension().string()));
+                response.Payload(util::ReadFile(path));
+
+                lLog(lDebug) << "Serving file " << path.string() << " with " << response.PayloadSize();
+
+                response.StatusCode(types::HttpStatusCode::OK);
+
+            } catch(const util::ServerException& e) {
+                lLog(lError) << e.what();
+                response.StatusCode(types::HttpStatusCode::NotFound);
+            }
         }
 
 		void UrlRouter::Register(const types::HttpMethod method, const std::string& url, RequestHandler callback) {

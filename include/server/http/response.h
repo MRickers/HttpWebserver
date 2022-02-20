@@ -20,6 +20,8 @@ namespace webserver::http {
         void StatusCode(const types::HttpStatusCode status);
         void ContentType(const types::MIMEType type);
 
+        size_t PayloadSize() const;
+
         std::vector<unsigned char> Format() const;
     };
 }
